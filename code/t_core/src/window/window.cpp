@@ -1,27 +1,27 @@
 #include "window/window.hpp"
+#include "file/file_manager.hpp"
 #include "gtkmm/filechooserdialog.h"
 
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 
 Window::Window()
-    : m_ButtonBox(Gtk::Orientation::VERTICAL), button_file("Выбрать файл") {
+    : ButtonBox(Gtk::Orientation::VERTICAL), button_file("Выбрать файл"),
+      selected_file_path(std::nullopt) {
   set_title(name);
   set_default_size(W, H);
-  set_child(m_ButtonBox);
+  set_child(ButtonBox);
 
-  m_ButtonBox.append(button_file);
+  ButtonBox.append(button_file);
   button_file.set_expand(true);
   button_file.signal_clicked().connect(
       sigc::mem_fun(*this, &Window::on_button_file_clicked));
 }
 
 void Window::on_button_file_clicked() {
-  std::unique_ptr<Gtk::FileChooserDialog> dia{
-      std::make_unique<Gtk::FileChooserDialog>("Выберите файл",
-                                               Gtk::FileChooser::Action::OPEN)};
   auto dialog = new Gtk::FileChooserDialog("Выберите файл",
                                            Gtk::FileChooser::Action::OPEN);
   dialog->set_transient_for(*this);
@@ -29,8 +29,8 @@ void Window::on_button_file_clicked() {
   dialog->signal_response().connect(sigc::bind(
       sigc::mem_fun(*this, &Window::on_file_dialog_response), dialog));
 
-  dialog->add_button("_Cancel", Gtk::ResponseType::CANCEL);
-  dialog->add_button("_Open", Gtk::ResponseType::OK);
+  dialog->add_button("Отмена", Gtk::ResponseType::CANCEL);
+  dialog->add_button("Открыть", Gtk::ResponseType::OK);
 
   auto filter_text = Gtk::FileFilter::create();
   filter_text->set_name("Text files");
@@ -51,8 +51,10 @@ void Window::on_file_dialog_response(int response_id,
   case Gtk::ResponseType::OK: {
     std::cout << "Open clicked." << std::endl;
 
-    auto filename = dialog->get_file()->get_path();
-    std::cout << "File selected: " << filename << std::endl;
+    this->selected_file_path = dialog->get_file()->get_path();
+    std::cout << "File selected: " << selected_file_path.value() << std::endl;
+    FileManager fm;
+    fm.Read(selected_file_path.value());
     break;
   }
   case Gtk::ResponseType::CANCEL: {

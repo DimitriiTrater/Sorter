@@ -3,10 +3,13 @@
 #include "gtkmm/applicationwindow.h"
 #include <glibmm/ustring.h>
 #include <gtkmm.h>
+#include <optional>
+#include <string>
 #include <string_view>
 
 struct Window : public Gtk::ApplicationWindow {
   Window();
+  std::optional<std::string> GetPath() { return selected_file_path; }
 
 private:
   const Glib::ustring name = "Sort";
@@ -16,8 +19,9 @@ private:
 protected:
   void on_button_file_clicked();
   void on_file_dialog_response(int response_id, Gtk::FileChooserDialog *dialog);
-  void on_folder_dialog_response(int response_id,
-                                 Gtk::FileChooserDialog *dialog);
-  Gtk::Box m_ButtonBox;
+
+  Gtk::Box ButtonBox;
   Gtk::Button button_file;
+
+  std::optional<std::string> selected_file_path;
 };
