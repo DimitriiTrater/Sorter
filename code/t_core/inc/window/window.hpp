@@ -23,6 +23,7 @@ private:
   const int H = 400;
   std::shared_ptr<ISort> sorter;
   void print_for_length();
+  void print_for_name();
 
 protected:
   void on_button_file_clicked();

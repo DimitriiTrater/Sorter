@@ -57,3 +57,14 @@ void FileManager::Write(std::string str, std::ofstream::openmode openmode) {
 
   writer.close();
 }
+
+
+void FileManager::Write(char fc, char sc, std::ofstream::openmode openmode) {
+  writer.open("result.txt", openmode);
+  if (!writer.is_open())
+    return;
+
+  writer << fc << sc;
+
+  writer.close();
+}

@@ -1,9 +1,12 @@
 #include "window/window.hpp"
+#include "container/container.hpp"
 #include "file/file_manager.hpp"
 #include "gtkmm/filechooserdialog.h"
 #include "interfaces/isort.hpp"
 #include "math/math.hpp"
 #include "sort/length_sort.hpp"
+#include "sort/name_sort.hpp"
+#include "utils/alphabet.hpp"
 
 #include <algorithm>
 #include <filesystem>
@@ -114,8 +117,10 @@ void Window::on_combo_changed() {
   case 1:
     sorter = std::make_shared<LengthSort>();
     break;
+  case 2:
+    sorter = std::make_shared<NameSort>();
+    break;
   }
-
   std::cout << text_sort_combobox.get_active_row_number() << std::endl;
 }
 
@@ -124,10 +129,6 @@ void Window::on_button_sort() {
   if (conts.empty())
     return;
   sorter->sort(conts);
-  std::cout << int(sorter->get_sort_type()) << std::endl;
-  for (auto &&elem : conts) {
-    std::cout << elem.coord_x << " " << elem.coord_y << std::endl;
-  }
   write_managing();
 }
 
@@ -135,11 +136,11 @@ void Window::write_managing() {
   switch (sorter->get_sort_type()) {
   case SORT_TYPE::NOTHING:
     break;
-  case SORT_TYPE::LENGTH: {
+  case SORT_TYPE::LENGTH:
     print_for_length();
     break;
-  }
   case SORT_TYPE::NAME:
+    print_for_name();
     break;
   case SORT_TYPE::TIME:
     break;
@@ -147,19 +148,75 @@ void Window::write_managing() {
     break;
   }
 }
+
 void Window::print_for_length() {
   FileManager fm;
   int x{10};
-  fm.Write("");
+  while (len_count(conts.at(0)) > x)
+    x *= x;
+
+  fm.Write("До " + std::to_string(x) + " ед.\n");
   for (auto &&el : conts) {
     if (len_count(el) > x) {
       x *= x;
       std::string x_s = "До " + std::to_string(x) + " ед.\n";
       fm.Write(x_s, std::ios::app);
-    } else {
-      std::string x_s = "До " + std::to_string(x) + " ед.\n";
-      fm.Write(x_s, std::ios::app);
     }
+    std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
+                       std::to_string(el.coord_y) + " " + el.type + " " +
+                       std::to_string(el.time_of_creation) + "\n");
+    fm.Write(res, std::ios::app);
+  }
+}
+
+void Window::print_for_name() {
+  FileManager fm;
+
+  auto RUALPHABET = std::vector<std::string>();
+  read_alphabet(RUALPHABET);
+  std::vector<Container> ru{};
+  std::vector<Container> other{};
+
+  for (auto &&el : conts) {
+    bool flag{false};
+    for (auto &&alph : RUALPHABET) {
+      if (alph.at(1) == el.name.at(1)) {
+        ru.push_back(el);
+        std::cout << "all good " << std::endl;
+        flag = true;
+        break;
+      }
+    }
+    if (!flag)
+      other.push_back(el);
+  }
+
+  fm.Write("");
+  auto first = ru.begin();
+  fm.Write(first->name.at(0), first->name.at(1), std::ios::app);
+
+  fm.Write("\n", std::ios::app);
+  std::string res = (first->name + " " + std::to_string(first->coord_x) + " " +
+                       std::to_string(first->coord_y) + " " + first->type + " " +
+                       std::to_string(first->time_of_creation) + "\n");
+  fm.Write(res, std::ios::app);
+
+  for(auto it = ru.begin()+1; it != ru.end(); ++it) {
+    if (first->name.at(0) == it->name.at(0) and first->name.at(1) != it->name.at(1)) {
+      fm.Write(it->name.at(0), it->name.at(1), std::ios::app);
+      fm.Write("\n", std::ios::app);
+    }
+    ++first;
+
+    
+    std::string res = (it->name + " " + std::to_string(it->coord_x) + " " +
+                       std::to_string(it->coord_y) + " " + it->type + " " +
+                       std::to_string(it->time_of_creation) + "\n");
+    fm.Write(res, std::ios::app);
+  }
+  
+  fm.Write("#\n", std::ios::app);
+  for (auto &&el : other) {
     std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
                        std::to_string(el.coord_y) + " " + el.type + " " +
                        std::to_string(el.time_of_creation) + "\n");
