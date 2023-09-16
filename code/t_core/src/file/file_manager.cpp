@@ -1,10 +1,13 @@
 #include "file/file_manager.hpp"
 #include "container/container.hpp"
+#include <iomanip>
 #include <iostream>
 #include <optional>
 #include <string>
 
-std::optional<std::vector<Container>> FileManager::Read(std::string path) {
+[[nodiscard]] std::optional<std::vector<Container>>
+FileManager::Read(std::string path) {
+  setlocale(LC_NUMERIC, "C");
   reader.open(path);
   std::vector<std::string> attrs{};
 
@@ -30,6 +33,10 @@ std::optional<std::vector<Container>> FileManager::Read(std::string path) {
         *it,       std::stod(*(it + 1)), std::stod(*(it + 2)),
         *(it + 3), std::stod(*(it + 4)),
     };
+    double t = std::stod("-37.23");
+    std::cout << *it << " " << std::stod(*(it + 1)) << " "
+              << std::stod(*(it + 2)) << " " << *(it + 3) << " "
+              << std::stod(*(it + 4)) << std::endl;
     res.push_back(temp_cntnr);
   }
   if (res.empty()) {
@@ -41,4 +48,12 @@ std::optional<std::vector<Container>> FileManager::Read(std::string path) {
   return res;
 }
 
-void FileManager::Write() {}
+void FileManager::Write(std::string str, std::ofstream::openmode openmode) {
+  writer.open("result.txt", openmode);
+  if (!writer.is_open())
+    return;
+
+  writer << str;
+
+  writer.close();
+}

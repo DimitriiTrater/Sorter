@@ -6,8 +6,8 @@
 
 class FileManager {
 public:
-  std::optional<std::vector<Container>> Read(std::string path);
-  void Write();
+  [[nodiscard]] std::optional<std::vector<Container>> Read(std::string path);
+  void Write(std::string str, std::ofstream::openmode openmode = std::ios::out);
 
 private:
   std::ifstream reader;

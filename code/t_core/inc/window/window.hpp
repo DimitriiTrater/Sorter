@@ -1,14 +1,17 @@
 #pragma once
 
+#include "container/container.hpp"
 #include "gtkmm/applicationwindow.h"
 #include "gtkmm/button.h"
 #include "gtkmm/combobox.h"
 #include "gtkmm/label.h"
+#include "interfaces/isort.hpp"
 #include <glibmm/ustring.h>
 #include <gtkmm.h>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 struct Window : public Gtk::ApplicationWindow {
   Window();
@@ -18,12 +21,15 @@ private:
   const Glib::ustring name = "Sort";
   const int W = 600;
   const int H = 400;
+  std::shared_ptr<ISort> sorter;
+  void print_for_length();
 
 protected:
   void on_button_file_clicked();
   void on_file_dialog_response(int response_id, Gtk::FileChooserDialog *dialog);
   void on_combo_changed();
   void on_button_sort();
+  void write_managing();
 
   Gtk::Box main_box;
 
@@ -38,4 +44,5 @@ protected:
   Gtk::Button write_button;
 
   std::optional<std::string> selected_file_path;
+  std::vector<Container> conts;
 };
