@@ -9,16 +9,21 @@
 #include <string>
 
 Window::Window()
-    : ButtonBox(Gtk::Orientation::VERTICAL), button_file("Выбрать файл"),
+    : main_box(Gtk::Orientation::VERTICAL), button_file("Выбрать файл"),
       selected_file_path(std::nullopt) {
   set_title(name);
   set_default_size(W, H);
-  set_child(ButtonBox);
+  set_child(main_box);
 
-  ButtonBox.append(button_file);
+  main_box.append(button_box);
+  button_box.append(button_file);
   button_file.set_expand(true);
   button_file.signal_clicked().connect(
       sigc::mem_fun(*this, &Window::on_button_file_clicked));
+
+  main_box.append(combobox_box);
+  combobox_box.append(sort_combobox);
+  sort_combobox.set_expand(true);
 }
 
 void Window::on_button_file_clicked() {
