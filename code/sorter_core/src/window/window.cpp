@@ -136,7 +136,6 @@ void Window::on_combo_changed() {
 }
 
 void Window::on_button_sort() {
-  std::cout << "Write Clicked" << std::endl;
   if (conts.empty())
     return;
   sorter->sort(conts);
@@ -167,7 +166,7 @@ void Window::print_for_length() {
   FileManager fm;
   int x{10};
   while (len_count(conts.at(0)) > x)
-    x *= x;
+    x *= 10;
 
   fm.Write("До " + std::to_string(x) + " ед.\n");
   for (auto &&el : conts) {
@@ -183,6 +182,8 @@ void Window::print_for_length() {
 void Window::print_for_name() {
   FileManager fm;
 
+  fm.Write("");
+
   auto RUALPHABET = std::vector<std::string>();
   read_alphabet(RUALPHABET);
   if (RUALPHABET.empty())
@@ -196,7 +197,6 @@ void Window::print_for_name() {
     for (auto &&alph : RUALPHABET) {
       if (alph.at(1) == el.name.at(1)) {
         ru.push_back(el);
-        std::cout << "all good " << std::endl;
         flag = true;
         break;
       }
@@ -205,13 +205,12 @@ void Window::print_for_name() {
       other.push_back(el);
   }
 
-  fm.Write("");
   auto first = ru.begin();
   fm.Write(first->name.at(0), first->name.at(1), std::ios::app);
 
   fm.Write("\n", std::ios::app);
   print_elem_info(*first);
-  
+
   for (auto it = ru.begin() + 1; it != ru.end(); ++it) {
     if (first->name.at(0) == it->name.at(0) and
         first->name.at(1) != it->name.at(1)) {

@@ -3,12 +3,12 @@ You need to be in root dir of repository.
 ``` bash
 bash build.sh 
 ```
-This command will run the script which build and launch application.
+This command will run the script, which build and launch application.
 
 
 
 ```
-[test.txt]
+[list_of_objects.txt]
 
 Кривой -37.23 13.44 Человек 1693235249.98678
 Магазин 0.163 2.119 Здание 1693135218.173

@@ -33,10 +33,6 @@ FileManager::Read(std::string path) {
         *it,       std::stod(*(it + 1)), std::stod(*(it + 2)),
         *(it + 3), std::stod(*(it + 4)),
     };
-    double t = std::stod("-37.23");
-    std::cout << *it << " " << std::stod(*(it + 1)) << " "
-              << std::stod(*(it + 2)) << " " << *(it + 3) << " "
-              << std::stod(*(it + 4)) << std::endl;
     res.push_back(temp_cntnr);
   }
   if (res.empty()) {
