@@ -33,12 +33,6 @@ private:
     fm.Write(res, std::ios::app);
   }
 
-  template <class Cont, class Comp>
-  void print_if(const Cont &cont, const Comp &comp) {
-    if (comp)
-      print_elem_info(cont);
-  }
-
   void print_for_length();
   void print_for_name();
   void print_for_time();

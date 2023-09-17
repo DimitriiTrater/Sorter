@@ -176,10 +176,7 @@ void Window::print_for_length() {
       std::string x_s = "До " + std::to_string(x) + " ед.\n";
       fm.Write(x_s, std::ios::app);
     }
-    std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
-                       std::to_string(el.coord_y) + " " + el.type + " " +
-                       std::to_string(el.time_of_creation) + "\n");
-    fm.Write(res, std::ios::app);
+    print_elem_info(el);
   }
 }
 
@@ -213,11 +210,8 @@ void Window::print_for_name() {
   fm.Write(first->name.at(0), first->name.at(1), std::ios::app);
 
   fm.Write("\n", std::ios::app);
-  std::string res = (first->name + " " + std::to_string(first->coord_x) + " " +
-                     std::to_string(first->coord_y) + " " + first->type + " " +
-                     std::to_string(first->time_of_creation) + "\n");
-  fm.Write(res, std::ios::app);
-
+  print_elem_info(*first);
+  
   for (auto it = ru.begin() + 1; it != ru.end(); ++it) {
     if (first->name.at(0) == it->name.at(0) and
         first->name.at(1) != it->name.at(1)) {
@@ -225,19 +219,12 @@ void Window::print_for_name() {
       fm.Write("\n", std::ios::app);
     }
     ++first;
-
-    std::string res = (it->name + " " + std::to_string(it->coord_x) + " " +
-                       std::to_string(it->coord_y) + " " + it->type + " " +
-                       std::to_string(it->time_of_creation) + "\n");
-    fm.Write(res, std::ios::app);
+    print_elem_info(*it);
   }
 
   fm.Write("#\n", std::ios::app);
   for (auto &&el : other) {
-    std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
-                       std::to_string(el.coord_y) + " " + el.type + " " +
-                       std::to_string(el.time_of_creation) + "\n");
-    fm.Write(res, std::ios::app);
+    print_elem_info(el);
   }
 }
 
