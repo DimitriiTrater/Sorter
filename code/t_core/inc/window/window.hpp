@@ -1,6 +1,7 @@
 #pragma once
 
 #include "container/container.hpp"
+#include "file/file_manager.hpp"
 #include "gtkmm/applicationwindow.h"
 #include "gtkmm/button.h"
 #include "gtkmm/combobox.h"
@@ -22,8 +23,27 @@ private:
   const int W = 600;
   const int H = 400;
   std::shared_ptr<ISort> sorter;
+
+  void print_elem_info(const Container& el) {
+    FileManager fm;
+
+    std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
+                        std::to_string(el.coord_y) + " " + el.type + " " +
+                        std::to_string(el.time_of_creation) + "\n");
+    fm.Write(res, std::ios::app);
+
+  }
+
+  template <class Cont, class Comp>
+  void print_if(const Cont& cont, const Comp& comp) {
+    if (comp)
+      print_elem_info(cont);
+  }
+
+  
   void print_for_length();
   void print_for_name();
+  void print_for_time();
 
 protected:
   void on_button_file_clicked();

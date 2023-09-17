@@ -1,15 +1,20 @@
 #include "window/window.hpp"
 #include "container/container.hpp"
+#include "date_lib/date.hpp"
 #include "file/file_manager.hpp"
 #include "gtkmm/filechooserdialog.h"
 #include "interfaces/isort.hpp"
 #include "math/math.hpp"
 #include "sort/length_sort.hpp"
 #include "sort/name_sort.hpp"
+#include "sort/time_sort.hpp"
 #include "utils/alphabet.hpp"
 
 #include <algorithm>
+#include <cstdint>
+#include <ctime>
 #include <filesystem>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -112,13 +117,14 @@ void Window::on_combo_changed() {
   if (text.empty())
     return;
   switch (text_sort_combobox.get_active_row_number()) {
-  case 0:
-    break;
   case 1:
     sorter = std::make_shared<LengthSort>();
     break;
   case 2:
     sorter = std::make_shared<NameSort>();
+    break;
+  case 3:
+    sorter = std::make_shared<TimeSort>();
     break;
   }
   std::cout << text_sort_combobox.get_active_row_number() << std::endl;
@@ -143,6 +149,7 @@ void Window::write_managing() {
     print_for_name();
     break;
   case SORT_TYPE::TIME:
+    print_for_time();
     break;
   case SORT_TYPE::TYPE:
     break;
@@ -150,6 +157,7 @@ void Window::write_managing() {
 }
 
 void Window::print_for_length() {
+
   FileManager fm;
   int x{10};
   while (len_count(conts.at(0)) > x)
@@ -174,6 +182,9 @@ void Window::print_for_name() {
 
   auto RUALPHABET = std::vector<std::string>();
   read_alphabet(RUALPHABET);
+  if (RUALPHABET.empty())
+    return;
+
   std::vector<Container> ru{};
   std::vector<Container> other{};
 
@@ -197,29 +208,56 @@ void Window::print_for_name() {
 
   fm.Write("\n", std::ios::app);
   std::string res = (first->name + " " + std::to_string(first->coord_x) + " " +
-                       std::to_string(first->coord_y) + " " + first->type + " " +
-                       std::to_string(first->time_of_creation) + "\n");
+                     std::to_string(first->coord_y) + " " + first->type + " " +
+                     std::to_string(first->time_of_creation) + "\n");
   fm.Write(res, std::ios::app);
 
-  for(auto it = ru.begin()+1; it != ru.end(); ++it) {
-    if (first->name.at(0) == it->name.at(0) and first->name.at(1) != it->name.at(1)) {
+  for (auto it = ru.begin() + 1; it != ru.end(); ++it) {
+    if (first->name.at(0) == it->name.at(0) and
+        first->name.at(1) != it->name.at(1)) {
       fm.Write(it->name.at(0), it->name.at(1), std::ios::app);
       fm.Write("\n", std::ios::app);
     }
     ++first;
 
-    
     std::string res = (it->name + " " + std::to_string(it->coord_x) + " " +
                        std::to_string(it->coord_y) + " " + it->type + " " +
                        std::to_string(it->time_of_creation) + "\n");
     fm.Write(res, std::ios::app);
   }
-  
+
   fm.Write("#\n", std::ios::app);
   for (auto &&el : other) {
     std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
                        std::to_string(el.coord_y) + " " + el.type + " " +
                        std::to_string(el.time_of_creation) + "\n");
     fm.Write(res, std::ios::app);
+  }
+}
+
+void Window::print_for_time() {
+  using namespace std::chrono;
+  FileManager fm;
+  fm.Write("");
+
+  auto vec_of_elems = conts;
+
+#define FLOOR_DAYS(CONTAINER)                                                  \
+  floor<days>(system_clock::from_time_t(CONTAINER.time_of_creation))
+
+  auto first = vec_of_elems.begin();
+  auto el_time = FLOOR_DAYS((*first));
+  fm.Write(el_time, std::ios::app);
+  fm.Write("\n", std::ios::app);
+  print_elem_info(*first);
+
+  for (auto it = vec_of_elems.begin() + 1; it != vec_of_elems.end(); ++it) {
+    if (FLOOR_DAYS((*it)) != FLOOR_DAYS((*first))) {
+      fm.Write(FLOOR_DAYS((*it)), std::ios::app);
+      fm.Write("\n", std::ios::app);
+    }
+    ++first;
+
+    print_elem_info(*it);
   }
 }
