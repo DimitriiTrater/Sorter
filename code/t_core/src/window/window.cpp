@@ -8,6 +8,7 @@
 #include "sort/length_sort.hpp"
 #include "sort/name_sort.hpp"
 #include "sort/time_sort.hpp"
+#include "sort/type_sort.hpp"
 #include "utils/alphabet.hpp"
 
 #include <algorithm>
@@ -19,6 +20,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 Window::Window()
     : main_box(Gtk::Orientation::VERTICAL), button_file("Выбрать файл"),
@@ -126,6 +128,9 @@ void Window::on_combo_changed() {
   case 3:
     sorter = std::make_shared<TimeSort>();
     break;
+  case 4:
+    sorter = std::make_shared<TypeSort>();
+    break;
   }
   std::cout << text_sort_combobox.get_active_row_number() << std::endl;
 }
@@ -152,6 +157,7 @@ void Window::write_managing() {
     print_for_time();
     break;
   case SORT_TYPE::TYPE:
+    print_for_type();
     break;
   }
 }
@@ -259,5 +265,49 @@ void Window::print_for_time() {
     ++first;
 
     print_elem_info(*it);
+  }
+}
+
+void Window::print_for_type() {
+  FileManager fm;
+  fm.Write("");
+
+  std::vector<Container> groups{};
+  std::vector<Container> other{};
+
+  NameSort sort_for_names;
+  bool flag{false};
+  for (auto it = conts.begin(); it != conts.end(); ++it) {
+    int i = 1;
+    std::vector<Container> group{};
+    while (it->type == (it + i)->type and it != conts.end()) {
+      i++;
+      flag = true;
+    }
+    if ((i == 1) and ((it - i)->type != it->type)) {
+      other.push_back(*it);
+      continue;
+    }
+    if (i == 1) {
+      continue;
+    }
+    while (i != 0) {
+      if (flag) {
+        fm.Write((*(it + i - 1)).type, std::ios::app);
+        fm.Write("\n", std::ios::app);
+        flag = false;
+      }
+      group.push_back(*(it + i - 1));
+      i--;
+    }
+    sort_for_names.sort(group);
+    for (auto &&el : group)
+      print_elem_info(el);
+  }
+
+  sort_for_names.sort(other);
+  fm.Write("Разное\n", std::ios::app);
+  for (auto &&el : other) {
+    print_elem_info(el);
   }
 }

@@ -24,26 +24,25 @@ private:
   const int H = 400;
   std::shared_ptr<ISort> sorter;
 
-  void print_elem_info(const Container& el) {
+  void print_elem_info(const Container &el) {
     FileManager fm;
 
     std::string res = (el.name + " " + std::to_string(el.coord_x) + " " +
-                        std::to_string(el.coord_y) + " " + el.type + " " +
-                        std::to_string(el.time_of_creation) + "\n");
+                       std::to_string(el.coord_y) + " " + el.type + " " +
+                       std::to_string(el.time_of_creation) + "\n");
     fm.Write(res, std::ios::app);
-
   }
 
   template <class Cont, class Comp>
-  void print_if(const Cont& cont, const Comp& comp) {
+  void print_if(const Cont &cont, const Comp &comp) {
     if (comp)
       print_elem_info(cont);
   }
 
-  
   void print_for_length();
   void print_for_name();
   void print_for_time();
+  void print_for_type();
 
 protected:
   void on_button_file_clicked();
