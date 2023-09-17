@@ -172,7 +172,7 @@ void Window::print_for_length() {
   fm.Write("До " + std::to_string(x) + " ед.\n");
   for (auto &&el : conts) {
     if (len_count(el) > x) {
-      x *= x;
+      x *= 10;
       std::string x_s = "До " + std::to_string(x) + " ед.\n";
       fm.Write(x_s, std::ios::app);
     }

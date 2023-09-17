@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 3.5.0)
-add_subdirectory(t_core)
-add_subdirectory(t_app)
+add_subdirectory(sorter_core)
+add_subdirectory(sorter_app)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(t_core)
+project(sorter_core)
 
 link_directories(${GTKMM_LIBRARY_DIRS})
 

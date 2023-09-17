@@ -19,7 +19,7 @@ struct Window : public Gtk::ApplicationWindow {
   std::optional<std::string> GetPath() { return selected_file_path; }
 
 private:
-  const Glib::ustring name = "Sort";
+  const Glib::ustring name = "Сортировщик";
   const int W = 600;
   const int H = 400;
   std::shared_ptr<ISort> sorter;
