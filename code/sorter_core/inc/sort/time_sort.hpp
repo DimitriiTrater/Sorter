@@ -11,7 +11,7 @@ class TimeSort : public ISort {
 public:
   virtual void sort(std::vector<Container> &vec_of_conts) override {
     std::sort(vec_of_conts.begin(), vec_of_conts.end(),
-              [](Container a, Container b) {
+              [](const Container &a, const Container &b) {
                 return a.time_of_creation > b.time_of_creation;
               });
   }

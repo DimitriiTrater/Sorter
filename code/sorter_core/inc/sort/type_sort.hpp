@@ -10,8 +10,9 @@
 class TypeSort : public ISort {
 public:
   virtual void sort(std::vector<Container> &vec_of_conts) override {
-    std::sort(vec_of_conts.begin(), vec_of_conts.end(),
-              [](Container a, Container b) { return a.type < b.type; });
+    std::sort(
+        vec_of_conts.begin(), vec_of_conts.end(),
+        [](const Container &a, const Container &b) { return a.type < b.type; });
   }
   virtual SORT_TYPE get_sort_type() override { return SORT_TYPE::TYPE; }
 };
