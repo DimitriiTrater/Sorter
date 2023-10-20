@@ -4,5 +4,5 @@
 
 /usr/bin/cmake --build /build --config Debug --target linux --
 
-/build/code/sorter_app/linux/linux
+./build/code/sorter_app/linux/linux
 
