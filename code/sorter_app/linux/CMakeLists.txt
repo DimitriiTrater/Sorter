@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(sorter_app)
+project(linux)
+
+message("Create linux build")
 
 link_directories(${GTKMM_LIBRARY_DIRS})
-
 include_directories(${GTKMM_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} main.cpp ${SRC_FILES})
