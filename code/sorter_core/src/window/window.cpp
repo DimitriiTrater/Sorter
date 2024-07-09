@@ -1,8 +1,6 @@
 #include "window/window.hpp"
 #include "container/container.hpp"
-#include "date_lib/date.hpp"
 #include "file/file_manager.hpp"
-#include "gtkmm/filechooserdialog.h"
 #include "interfaces/isort.hpp"
 #include "math/math.hpp"
 #include "sort/length_sort.hpp"
@@ -11,10 +9,6 @@
 #include "sort/type_sort.hpp"
 #include "utils/alphabet.hpp"
 
-#include <algorithm>
-#include <cstdint>
-#include <ctime>
-#include <filesystem>
 #include <ios>
 #include <iostream>
 #include <memory>
@@ -22,130 +16,94 @@
 #include <string>
 #include <vector>
 
-Window::Window()
-    : main_box(Gtk::Orientation::VERTICAL), button_file("Выбрать файл"),
-      write_button("Сохранить в файл"), selected_file_path(std::nullopt),
-      combobox_label("Выберите тип группировки:") {
-  set_title(name);
-  set_default_size(W, H);
-  set_child(main_box);
+#include <QFileDialog>
+#include <QWidget>
 
-  main_box.append(button_box);
-  button_box.append(button_file);
-  button_file.set_expand(true);
-  button_file.signal_clicked().connect(
-      sigc::mem_fun(*this, &Window::on_button_file_clicked));
 
-  main_box.append(combobox_box);
-  combobox_box.append(combobox_label);
-  combobox_box.append(text_sort_combobox);
-  text_sort_combobox.set_expand(true);
-  text_sort_combobox.append("-");
-  text_sort_combobox.append("По расстоянию");
-  text_sort_combobox.append("По имени");
-  text_sort_combobox.append("По времени создания");
-  text_sort_combobox.append("По типу");
-  text_sort_combobox.set_active(0);
-  text_sort_combobox.signal_changed().connect(
-      sigc::mem_fun(*this, &Window::on_combo_changed));
+Window::Window(QWidget * parent)
+: QMainWindow(parent)
+, sorter(std::make_shared<LengthSort>())
+{
+  this->setFixedSize({this->W, this->H});
+  this->setWindowTitle(name);
 
-  main_box.append(write_box);
-  write_box.append(write_button);
-  write_button.set_expand(true);
-  write_button.signal_clicked().connect(
-      sigc::mem_fun(*this, &Window::on_button_sort));
+  main_box = new QVBoxLayout(this);
+
+  button_file = new QPushButton("Выбрать файл");
+  connect(button_file, SIGNAL(clicked()), this, SLOT( on_button_file_clicked()));
+  main_box->addWidget(button_file);
+
+  combobox_box = new QHBoxLayout();
+  combobox_label = new QLabel("Тип сортировки");
+  combobox_box->addWidget(combobox_label);
+  sort_combobox = new QComboBox();
+
+  sort_combobox->addItem("Расстояние");
+  sort_combobox->addItem("Имя");
+  sort_combobox->addItem("Время");
+  sort_combobox->addItem("Тип");
+
+  combobox_box->addWidget(sort_combobox);
+
+  connect(sort_combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(on_combo_changed(int)));
+
+  main_box->addItem(combobox_box);
+  write_button = new QPushButton("Сохранить в файл");
+  connect(write_button, SIGNAL(clicked()), this, SLOT(on_button_sort()));
+  main_box->addWidget(write_button);
+
+  auto * widget = new QWidget();
+  widget->setLayout(main_box);
+  this->setCentralWidget(widget);
 }
 
 void Window::on_button_file_clicked() {
-  auto dialog = new Gtk::FileChooserDialog("Выберите файл",
-                                           Gtk::FileChooser::Action::OPEN);
-  dialog->set_transient_for(*this);
-  dialog->set_modal(true);
-  dialog->signal_response().connect(sigc::bind(
-      sigc::mem_fun(*this, &Window::on_file_dialog_response), dialog));
+  auto dialog = QFileDialog::getOpenFileName(
+                                this, tr("Lol"),
+                                "./", tr("Text files (*.txt)"));
 
-  dialog->add_button("Отмена", Gtk::ResponseType::CANCEL);
-  dialog->add_button("Выбрать", Gtk::ResponseType::OK);
-
-  auto filter_text = Gtk::FileFilter::create();
-  filter_text->set_name("Text files");
-  filter_text->add_mime_type("text/plain");
-  dialog->add_filter(filter_text);
-
-  auto filter_any = Gtk::FileFilter::create();
-  filter_any->set_name("Any files");
-  filter_any->add_pattern("*");
-  dialog->add_filter(filter_any);
-
-  dialog->show();
-}
-
-void Window::on_file_dialog_response(int response_id,
-                                     Gtk::FileChooserDialog *dialog) {
-  switch (response_id) {
-  case Gtk::ResponseType::OK: {
-    std::cout << "Open clicked." << std::endl;
-
-    this->selected_file_path = dialog->get_file()->get_path();
-
-    if (!selected_file_path)
-      break;
-
-    std::cout << "File selected: " << selected_file_path.value() << std::endl;
-
-    FileManager fm;
-    auto fm_read = fm.Read(selected_file_path.value());
-
-    if (!fm_read)
-      break;
-
-    conts = fm_read.value();
-    break;
-  }
-  case Gtk::ResponseType::CANCEL: {
-    std::cout << "Cancel clicked." << std::endl;
-    break;
-  }
-  default: {
-    std::cout << "Unexpected button clicked." << std::endl;
-    break;
-  }
-  }
-  delete dialog;
-}
-
-void Window::on_combo_changed() {
-  Glib::ustring text = text_sort_combobox.get_active_text();
-  if (text.empty())
+  std::clog << dialog.toStdString() << "\n";
+  if (dialog.isEmpty())
+  {
     return;
-  switch (text_sort_combobox.get_active_row_number()) {
-  case 1:
+  }
+  FileManager fm;
+  auto fm_read = fm.Read(dialog.toStdString());
+  if (fm_read.has_value())
+  {
+    conts = fm_read.value();
+  }
+}
+
+void Window::on_combo_changed(int index) {
+  switch (index) {
+  case 0:
     sorter = std::make_shared<LengthSort>();
     break;
-  case 2:
+  case 1:
     sorter = std::make_shared<NameSort>();
     break;
-  case 3:
+  case 2:
     sorter = std::make_shared<TimeSort>();
     break;
-  case 4:
+  case 3:
     sorter = std::make_shared<TypeSort>();
     break;
   }
-  std::cout << text_sort_combobox.get_active_row_number() << std::endl;
 }
 
 void Window::on_button_sort() {
+  std::clog << "on_button_sort\n";
   if (conts.empty())
+  {
     return;
+  }
   sorter->sort(conts);
   write_managing();
 }
 
 void Window::write_managing() {
   switch (sorter->get_sort_type()) {
-  case SORT_TYPE::NOTHING:
-    break;
   case SORT_TYPE::LENGTH:
     print_for_length();
     break;
@@ -158,6 +116,7 @@ void Window::write_managing() {
   case SORT_TYPE::TYPE:
     print_for_type();
     break;
+  default: break;
   }
 }
 

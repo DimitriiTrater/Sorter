@@ -1,7 +1,7 @@
 #pragma once
 
 #include "window/window.hpp"
-#include <gtkmm.h>
+#include <QApplication>
 
 class Engine {
   Engine() {}
@@ -15,7 +15,11 @@ public:
   }
 
   int run(int argc, char *argv[]) {
-    auto app = Gtk::Application::create("t.x");
-    return app->make_window_and_run<Window>(argc, argv);
+    QApplication app(argc, argv);
+    QString param = QString(argv[0]);
+    Window w(nullptr);
+    w.show();
+
+    return app.exec();
   }
 };
