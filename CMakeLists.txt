@@ -9,6 +9,4 @@ set(PROJECT_ROOT ${PROJECT_SOURCE_DIR})
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-option(Linux "Linux" OFF)
-
 add_subdirectory(code)
